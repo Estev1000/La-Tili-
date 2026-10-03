@@ -524,7 +524,12 @@
       nick: state.me.nick,
       msg: raw
     });
-    if (error) systemMsg('No se pudo enviar: ' + error.message);
+    if (error) {
+      // Si lo frenó el anti-spam, el texto vuelve al campo para no perderlo
+      el.message.value = raw;
+      el.message.focus();
+      systemMsg('No se pudo enviar: ' + error.message);
+    }
   });
 
   el.chat.addEventListener('click', async (e) => {
