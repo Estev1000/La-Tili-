@@ -6,6 +6,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>La Tili - Chat y Directos</title>
 
+  <!-- PWA: instalable como app -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#764ba2">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="La Tili">
+  <meta name="description" content="Chat global, mensajes privados y transmisiones en vivo de La Tili.">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
 
@@ -48,12 +59,47 @@
           <i class="fas fa-circle-user me-1"></i>
           <span id="currentUserNick"></span>
         </span>
+        <button id="installNavBtn" class="btn btn-sm btn-outline-light d-none" title="Descargar La Tili">
+          <i class="fas fa-download me-1"></i>App
+        </button>
         <button id="logoutBtn" class="btn btn-sm btn-outline-light d-none">
           <i class="fas fa-right-from-bracket me-1"></i>Salir
         </button>
       </div>
     </div>
   </nav>
+
+  <!-- Carta de instalación de la app -->
+  <div id="installCard" class="install-card-wrap d-none">
+    <div class="glass-effect rounded-4 p-4 install-card">
+      <div class="d-flex align-items-start gap-3">
+        <img src="icon-192x192.png" alt="Logo de La Tili" class="install-card-icon rounded-3" width="56" height="56">
+        <div class="flex-grow-1">
+          <h6 class="text-white fw-bold mb-1">
+            <i class="fas fa-mobile-screen-button me-2 text-pink-500"></i>Llevate La Tili
+          </h6>
+          <p id="installCardHint" class="text-white-50 small mb-0">
+            Instalala en tu teléfono y abrila como una app, sin buscar el link cada vez.
+          </p>
+        </div>
+        <button type="button" id="installCardClose" class="btn-close btn-close-white flex-shrink-0" aria-label="Cerrar"></button>
+      </div>
+      <button type="button" id="installCardBtn" class="btn live-gradient text-white fw-bold w-100 mt-3 rounded-3">
+        <i class="fas fa-download me-2"></i>Descargar app
+      </button>
+    </div>
+  </div>
+
+  <!-- Aviso de versión nueva -->
+  <div id="pwaUpdate" class="pwa-toast-wrap d-none">
+    <div class="glass-effect rounded-4 p-3 install-card d-flex align-items-center gap-3">
+      <i class="fas fa-arrow-rotate-right text-white fs-5"></i>
+      <span class="text-white small flex-grow-1">Hay una versión nueva de La Tili</span>
+      <button type="button" id="pwaUpdateBtn" class="btn btn-sm live-gradient text-white rounded-3 px-3">
+        Actualizar
+      </button>
+    </div>
+  </div>
 
   <div class="container-fluid pt-5 mt-4">
 
@@ -303,6 +349,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@4.6.4/dist/emoji-button.min.js"></script>
   <script src="js/config.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/pwa.js"></script>
 </body>
 
 </html>

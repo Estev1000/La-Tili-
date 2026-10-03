@@ -12,3 +12,9 @@ node_modules/
 # Env (nunca subir claves)
 .env
 .env.*
+
+# Credenciales y datos personales
+Mail y cuenta de Github.txt
+*.txt.local
+credenciales*.txt
+contrasenas*.txt
