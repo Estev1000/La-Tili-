@@ -271,7 +271,15 @@
   // -------------------------------------------------------------
   async function enterChat(user) {
     const nick = (user.user_metadata && user.user_metadata.nick) || emailToNick(user.email);
-    state.me = { id: user.id, nick };
+    state.me = { id: user.id, nick, isAdmin: false };
+
+    // Marca de administrador (puede borrar mensajes ajenos)
+    const { data: perfil } = await supabase
+      .from('profiles')
+      .select('is_admin')
+      .eq('id', user.id)
+      .maybeSingle();
+    if (perfil) state.me.isAdmin = !!perfil.is_admin;
 
     el.nickWrap.style.display = 'none';
     el.contentWrap.style.display = 'flex';
@@ -468,10 +476,11 @@
     state.seenMessages.add(row.id);
 
     const isOwn = row.user_id === state.me.id;
-    const actions = isOwn
+    const isAdmin = !!state.me.isAdmin;
+    const actions = (isOwn || isAdmin)
       ? `<span class="ms-auto">
-           <button type="button" class="btn btn-sm btn-warning edit-msg-btn ms-1" data-id="${row.id}">✏️</button>
-           <button type="button" class="btn btn-sm btn-danger delete-msg-btn ms-1" data-id="${row.id}">🗑️</button>
+           ${isOwn ? `<button type="button" class="btn btn-sm btn-warning edit-msg-btn ms-1" data-id="${row.id}">✏️</button>` : ''}
+           <button type="button" class="btn btn-sm btn-danger delete-msg-btn ms-1" data-id="${row.id}" data-mod="${isOwn ? '0' : '1'}">🗑️</button>
          </span>`
       : '';
 
@@ -537,12 +546,14 @@
 
     const delBtn = e.target.closest('.delete-msg-btn');
     if (delBtn) {
-      if (!confirm('¿Eliminar este mensaje?')) return;
-      const { error } = await supabase
-        .from('messages')
-        .delete()
-        .eq('id', delBtn.dataset.id)
-        .eq('user_id', state.me.id);
+      const mod = delBtn.dataset.mod === '1';
+      const pregunta = mod
+        ? 'Como moderador, ¿eliminar este mensaje de otro usuario?'
+        : '¿Eliminar este mensaje?';
+      if (!confirm(pregunta)) return;
+      let q = supabase.from('messages').delete().eq('id', delBtn.dataset.id);
+      if (!mod) q = q.eq('user_id', state.me.id);
+      const { error } = await q;
       if (error) systemMsg('No se pudo eliminar: ' + error.message);
     }
   });
