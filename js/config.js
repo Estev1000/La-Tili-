@@ -1,15 +1,11 @@
 // =============================================================
 // Configuración de Supabase para La Tili
 //
-// 1) Supabase Dashboard > Project Settings > API
-// 2) Copiá "Project URL" en SUPABASE_URL
-// 3) Copiá la clave "anon / publishable" en SUPABASE_ANON_KEY
-//    (NUNCA la service_role: es secreta y va solo en el servidor)
-//
-// La clave anon es pública por diseño: la seguridad laotone la base
-// con las policies RLS de supabase/schema.sql
+// La clave anon es pública por diseño: la seguridad la ponen las
+// policies RLS de supabase/schema.sql
+// NUNCA subas la clave service_role a este archivo.
 // =============================================================
 
-window.SUPABASE_URL = 'https://TU_PROJECT_REF.supabase.co';
-window.SUPABASE_ANON_KEY = 'TU_CLAVE_ANON_PUBLISHABLE';
+window.SUPABASE_URL = 'https://dmztuxogbmrdodaltgkq.supabase.co';
+window.SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtenR1eG9nYm1yZG9kYWx0Z2txIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA5OTk1MzMsImV4cCI6MjEwNjU3NTUzM30.dLDBxGK11FhYfxt2TSRUV9WV1mk-AvHEJookeEM_tSA';
 window.NICK_EMAIL_DOMAIN = '@latili.app';
