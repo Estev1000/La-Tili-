@@ -1,0 +1,27 @@
+name: Keep Supabase awake
+
+on:
+  schedule:
+    # Todos los días a las 08:17 UTC. Sup pausa los proyectos del plan
+    # gratuito después de 7 días sin actividad, así que lo mantenemos vivo.
+    - cron: '17 8 * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    name: Ping al proyecto de Supabase
+    runs-on: ubuntu-latest
+    steps:
+      - name: Consultar la API REST
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            "$SUPABASE_URL/rest/v1/")
+          echo "HTTP $code"
+          if [ "$code" -ge 500 ]; then
+            echo "::error::Supabase respondió $code"
+            exit 1
+          fi

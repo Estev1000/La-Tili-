@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>La Tili - Chat y Directos</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Animate CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Main CSS -->
+  <link rel="stylesheet" href="css/main.css">
+
+  <!-- Supabase SDK (UMD, expone window.supabase) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+  <!-- Particles Background -->
+  <div class="particles" id="particles"></div>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-modern fixed-top">
+    <div class="container-fluid px-4">
+      <a class="navbar-brand text-white fw-bold fs-3" href="./">
+        <i class="fas fa-broadcast-tower me-2 text-pink-500"></i>
+        La Tili
+      </a>
+      <div class="d-flex align-items-center">
+        <span class="text-white me-3">
+          <i class="fas fa-users me-1"></i>
+          <span id="userCount">0</span> online
+        </span>
+        <span id="currentUser" class="text-white me-3 d-none">
+          <i class="fas fa-circle-user me-1"></i>
+          <span id="currentUserNick"></span>
+        </span>
+        <button id="logoutBtn" class="btn btn-sm btn-outline-light d-none">
+          <i class="fas fa-right-from-bracket me-1"></i>Salir
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container-fluid pt-5 mt-4">
+
+    <!-- Login Section -->
+    <div class="row justify-content-center min-vh-100 align-items-center" id="nickWrap">
+      <div class="col-md-4">
+        <div class="glass-effect rounded-4 p-5 floating">
+          <div class="text-center mb-4">
+            <div class="d-inline-block p-3 rounded-circle live-gradient mb-3">
+              <i class="fas fa-video text-white fs-1"></i>
+            </div>
+            <h2 class="text-white fw-bold mb-2">Bienvenido a La Tili</h2>
+            <p class="text-white-50">La experiencia de streaming más avanzada</p>
+          </div>
+
+          <div id="nickError" class="mb-3"></div>
+
+          <form id="authForm" autocomplete="off">
+            <div class="mb-4">
+              <label for="nickname" class="form-label text-white fw-semibold">
+                <i class="fas fa-user me-2"></i>Usuario
+              </label>
+              <input id="nickname" type="text" class="form-control modern-input text-white"
+                placeholder="Tu nombre de usuario" maxlength="20" autocomplete="username">
+            </div>
+
+            <div class="mb-4">
+              <label for="password" class="form-label text-white fw-semibold">
+                <i class="fas fa-lock me-2"></i>Contraseña
+              </label>
+              <input id="password" type="password" class="form-control modern-input text-white"
+                placeholder="Tu contraseña" autocomplete="current-password">
+            </div>
+
+            <div class="d-grid gap-2">
+              <button type="button" id="loginBtn" class="btn btn-lg live-gradient text-white fw-bold py-3 rounded-3">
+                <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+              </button>
+              <button type="button" id="registerBtn" class="btn btn-outline-light btn-lg fw-semibold py-3 rounded-3">
+                <i class="fas fa-user-plus me-2"></i>Crear Cuenta
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Chat Interface -->
+    <div class="row g-4" id="contentWrap" style="display: none;">
+
+      <!-- Chat Section -->
+      <div class="col-lg-8">
+        <div class="glass-effect rounded-4 h-100">
+          <div class="d-flex justify-content-between align-items-center p-4 border-bottom border-white border-opacity-20">
+            <div class="d-flex align-items-center">
+              <div class="pulse-ring bg-success rounded-circle me-3" style="width: 12px; height: 12px;"></div>
+              <h4 class="text-white fw-bold mb-0">
+                <i class="fas fa-comments me-2"></i>Chat Global
+              </h4>
+            </div>
+            <button id="toggleLiveBtn" class="btn live-gradient px-4 py-2 rounded-3 fw-bold text-white">
+              <i class="fas fa-video me-2"></i>Ir en Vivo
+            </button>
+          </div>
+
+          <div id="chat" class="p-4" style="height: 400px; overflow-y: auto;">
+            <!-- Los mensajes se inyectan desde js/app.js -->
+          </div>
+
+          <div class="p-4 border-top border-white border-opacity-20">
+            <form id="message-form">
+              <div class="input-group">
+                <button type="button" id="emoji-btn" class="btn btn-outline-light rounded-start-3">
+                  <i class="far fa-smile"></i>
+                </button>
+                <input type="text" id="message" class="form-control modern-input text-white"
+                  placeholder="Escribe tu mensaje..." maxlength="500" autocomplete="off">
+                <button type="submit" class="btn live-gradient rounded-end-3 px-4">
+                  <i class="fas fa-paper-plane"></i>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Users Sidebar -->
+      <div class="col-lg-4">
+        <div class="glass-effect rounded-4 p-4">
+          <h5 class="text-white fw-bold mb-4">
+            <i class="fas fa-users me-2"></i>Usuarios Conectados
+          </h5>
+          <div id="usernames" class="space-y-2">
+            <!-- Lista de usuarios conectados -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Stream Section -->
+    <div id="liveStreamSection" class="row justify-content-center mt-5 d-none">
+      <div class="col-lg-10">
+        <div class="glass-effect rounded-4 p-5">
+
+          <div class="text-center mb-5">
+            <div class="d-inline-flex align-items-center gap-3 mb-3">
+              <h2 class="text-white fw-bold mb-0">
+                <i class="fas fa-broadcast-tower me-3"></i>Transmisión en Vivo
+              </h2>
+              <span id="liveIndicator" class="badge live-indicator-modern px-3 py-2 rounded-pill fw-bold d-none">
+                <i class="fas fa-circle me-2"></i>EN VIVO
+              </span>
+            </div>
+            <p class="text-white-50 fs-5" id="liveHostLabel"></p>
+          </div>
+
+          <div class="text-center mb-5">
+            <div class="d-inline-flex gap-3">
+              <button id="startLiveBtn" class="btn btn-lg live-gradient px-5 py-3 rounded-3 fw-bold text-white">
+                <i class="fas fa-play me-2"></i>Iniciar Transmisión
+              </button>
+              <button id="stopLiveBtn" class="btn btn-lg btn-outline-danger px-5 py-3 rounded-3 fw-bold d-none">
+                <i class="fas fa-stop me-2"></i>Detener
+              </button>
+            </div>
+          </div>
+
+          <div class="row g-4 mb-5">
+            <div id="localVideoCol" class="col-12 mb-4">
+              <div class="video-container position-relative" style="min-height: 480px; background: #181c2f;">
+                <video id="localVideo" autoplay muted playsinline class="w-100 h-100 rounded-4 d-none shadow-lg border border-3 border-white"
+                  style="width:100%;height:100%;object-fit:contain;background:#000;"></video>
+                <div id="localVideoOverlay"
+                  class="position-absolute top-0 start-0 m-3 px-3 py-1 rounded-3 bg-dark bg-opacity-75 text-white fw-bold small d-none"
+                  style="z-index:2;">
+                  <i class="fas fa-user-circle me-1"></i>Tu cámara
+                </div>
+                <div class="position-absolute top-0 end-0 m-3 z-2">
+                  <button type="button" id="fullscreenLocalBtn" class="btn btn-dark btn-sm rounded-circle shadow">
+                    <i class="fas fa-expand"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div id="remoteVideoCol" class="col-12">
+              <div class="video-container position-relative" style="min-height: 480px; background: #181c2f;">
+                <video id="remoteVideo" autoplay playsinline class="w-100 h-100 rounded-4 d-none shadow-lg border border-3 border-white"
+                  style="width:100%;height:100%;object-fit:contain;background:#000;"></video>
+                <div id="remoteVideoOverlay"
+                  class="position-absolute top-0 start-0 m-3 px-3 py-1 rounded-3 bg-danger bg-opacity-75 text-white fw-bold small d-none"
+                  style="z-index:2;">
+                  <i class="fas fa-broadcast-tower me-1"></i>En vivo
+                </div>
+                <div class="position-absolute top-0 end-0 m-3 z-2">
+                  <button type="button" id="fullscreenRemoteBtn" class="btn btn-dark btn-sm rounded-circle shadow">
+                    <i class="fas fa-expand"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Social Share -->
+          <div class="text-center mb-5">
+            <h5 class="text-white fw-bold mb-4">
+              <i class="fas fa-share-alt me-2"></i>Comparte tu transmisión
+            </h5>
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
+              <a id="shareWhatsapp" target="_blank" rel="noopener" class="btn btn-success social-btn rounded-circle p-3">
+                <i class="fab fa-whatsapp fs-4"></i>
+              </a>
+              <a id="shareFacebook" target="_blank" rel="noopener" class="btn btn-primary social-btn rounded-circle p-3">
+                <i class="fab fa-facebook fs-4"></i>
+              </a>
+              <a id="shareTwitter" target="_blank" rel="noopener" class="btn btn-info social-btn rounded-circle p-3">
+                <i class="fab fa-twitter fs-4"></i>
+              </a>
+              <button type="button" id="shareInstagram" class="btn social-btn rounded-circle p-3"
+                style="background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);">
+                <i class="fab fa-instagram fs-4 text-white"></i>
+              </button>
+              <button type="button" id="copyLink" class="btn btn-secondary social-btn rounded-circle p-3">
+                <i class="fas fa-link fs-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Live Chat -->
+          <div class="glass-effect rounded-4 p-4">
+            <h5 class="text-white fw-bold mb-4">
+              <i class="fas fa-comments me-2 text-pink-500"></i>Chat de la Transmisión
+              <span class="badge bg-pink-500 ms-2 rounded-pill">EXCLUSIVO</span>
+            </h5>
+
+            <div id="liveChat" class="mb-4" style="height: 300px; overflow-y: auto;">
+              <!-- Mensajes del live -->
+            </div>
+
+            <form id="live-message-form">
+              <div class="input-group">
+                <input type="text" id="liveMessage" class="form-control modern-input text-white"
+                  placeholder="Mensaje para la transmisión..." maxlength="500" autocomplete="off">
+                <button type="submit" class="btn live-gradient px-4">
+                  <i class="fas fa-paper-plane"></i>
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div class="text-center mt-4">
+            <button type="button" id="closeLiveBtn" class="btn btn-outline-light px-4 py-2 rounded-3">
+              <i class="fas fa-times me-2"></i>Cerrar Transmisión
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Private Message Modal -->
+  <div class="modal fade" id="privateMsgModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content glass-effect border-0">
+        <div class="modal-header border-bottom border-white border-opacity-20">
+          <h5 class="modal-title text-white">
+            <i class="fas fa-envelope me-2"></i>Mensaje Privado a <span id="privateMsgUser"></span>
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="text" id="privateMsgInput" class="form-control modern-input text-white"
+            placeholder="Escribe tu mensaje privado..." maxlength="500" autocomplete="off">
+        </div>
+        <div class="modal-footer border-top border-white border-opacity-20">
+          <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn live-gradient" id="sendPrivateMsgBtn">
+            <i class="fas fa-paper-plane me-2"></i>Enviar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@4.6.4/dist/emoji-button.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
+</body>
+
+</html>

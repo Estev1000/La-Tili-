@@ -1,0 +1,14 @@
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Node (ya no se usa, queda por si volvés a la versión con servidor)
+node_modules/
+
+# Editores
+.vscode/
+.idea/
+
+# Env (nunca subir claves)
+.env
+.env.*
